@@ -47,7 +47,7 @@ def parse_list_page(response):
 
 
 class PlayListSpider(scrapy.Spider):
-    name = "comment"
+    name = "most_like_comment"
     allowed_domains = ["music.163.com"]
 
     category = ["华语", "欧美", "日语", "韩语", "粤语", "小语种"]
