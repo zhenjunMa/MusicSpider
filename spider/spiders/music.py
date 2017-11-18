@@ -18,8 +18,7 @@ class CommentSpider(scrapy.Spider):
         # FormRequest 是Scrapy发送POST请求的方法
         yield scrapy.FormRequest(
             url,
-            formdata={"params": "xk/7lCFhrKKRmp33SBs87Yx6/9YwEHKRYlwsW5TVVn2jJ+832PNKWa798LraAwXO7hd/RD+eVZgLFnKHntbTqY52J5RTteZnYKwD1lCJnpX9x8RPeoESWo0PJ0/RPD+HxI5u3baQD4DLMOQU5DJ+0uiRcsckvxkFW8U4MAjkFWI2yN0SvrJetTERoaqU20up", "encSecKey": "8f43f3aaaa9a6e1060f04486b7c42619ab9543aca4000b885469afe992d4c86423c6bfe3494d71dcfab426891a0177347a089dd5b19561fd93ac7b79f7b617ec2b13ac677d709c2a22fb68521a181c737711e1d4cb294cb466faa40c9ca687d43d71e4e2eeaad5a217bcb01e121ae6229d5d05f129d8f91a51997fa8712df5a0"},
-            callback=self.parse_page
+            formdata={"params": "xk/7lCFhrKKRmp33SBs87Yx6/9YwEHKRYlwsW5TVVn2jJ+832PNKWa798LraAwXO7hd/RD+eVZgLFnKHntbTqY52J5RTteZnYKwD1lCJnpX9x8RPeoESWo0PJ0/RPD+HxI5u3baQD4DLMOQU5DJ+0uiRcsckvxkFW8U4MAjkFWI2yN0SvrJetTERoaqU20up", "encSecKey": "8f43f3aaaa9a6e1060f04486b7c42619ab9543aca4000b885469afe992d4c86423c6bfe3494d71dcfab426891a0177347a089dd5b19561fd93ac7b79f7b617ec2b13ac677d709c2a22fb68521a181c737711e1d4cb294cb466faa40c9ca687d43d71e4e2eeaad5a217bcb01e121ae6229d5d05f129d8f91a51997fa8712df5a0"}
         )
         # for sel in response.xpath('//a[@class="s-fc7"]/text()'):
         #     print sel.extract()
@@ -29,8 +28,9 @@ class CommentSpider(scrapy.Spider):
         # print item['content']
         # yield item
 
-    def parse_page(self, response):
+    def parse(self, response):
         jsonstr = json.loads(response.body_as_unicode())
+        print str(jsonstr)
         for l in jsonstr["hotComments"]:
             item = CommentItem()
             item['content'] = l["content"].encode('utf-8')
