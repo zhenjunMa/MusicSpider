@@ -13,12 +13,12 @@ class CommentSpider(scrapy.Spider):
     # ]
 
     def start_requests(self):
-        url = 'https://music.163.com/weapi/v1/resource/comments/R_SO_4_255677?csrf_token='
+        url = 'https://music.163.com/weapi/v1/resource/comments/R_SO_4_255677?csrf_token=37bdc4f8c949263c8003ab9cb140cc94'
 
         # FormRequest 是Scrapy发送POST请求的方法
         yield scrapy.FormRequest(
             url,
-            formdata={"params": "xk/7lCFhrKKRmp33SBs87Yx6/9YwEHKRYlwsW5TVVn2jJ+832PNKWa798LraAwXO7hd/RD+eVZgLFnKHntbTqY52J5RTteZnYKwD1lCJnpX9x8RPeoESWo0PJ0/RPD+HxI5u3baQD4DLMOQU5DJ+0uiRcsckvxkFW8U4MAjkFWI2yN0SvrJetTERoaqU20up", "encSecKey": "8f43f3aaaa9a6e1060f04486b7c42619ab9543aca4000b885469afe992d4c86423c6bfe3494d71dcfab426891a0177347a089dd5b19561fd93ac7b79f7b617ec2b13ac677d709c2a22fb68521a181c737711e1d4cb294cb466faa40c9ca687d43d71e4e2eeaad5a217bcb01e121ae6229d5d05f129d8f91a51997fa8712df5a0"}
+            formdata={"params": "EwqXu+gKzBxeOxs0ipIsqrj3FrBx+9+0rVNMetFypm+wyolPofTK3OunU6ublmvwlKd/DOQBXXuQsG7plOY1Ld3M07otT0/zkMbRChueAwaw/vWt2preqSAjzL90fjcHZC5Fpu+2/G9phSJ2uNdzoL+CL+7p596lJ1+IreZ/EQ9YrGld5cf34wr8vnix2bWeswbFKU3mZhT7joxZCZb3VZteJfAo8ZaGRnBbHRwrvr0=", "encSecKey": "5179db23b4a2292422de58534d147edac80387513fa066f958f9d849af7a4718a4362e028884f6985eb109c0ef1fa9e7b42b9b8135fd169c273a275a90efbc635d829722e5308e5c05c77fb6cca3b4b62bbd5cd28058e1db0fc8c7d6f9026db0ae1f7596bf8c27fc405325fd0bb106c97d61801a096c5891b8731a70ed58b791"}
         )
         # for sel in response.xpath('//a[@class="s-fc7"]/text()'):
         #     print sel.extract()
@@ -34,6 +34,6 @@ class CommentSpider(scrapy.Spider):
         for l in jsonstr["hotComments"]:
             item = CommentItem()
             item['content'] = l["content"].encode('utf-8')
-            item['reply'] = json.loads(jsonstr["beReplied"])
-            item['likeNum'] = l["likedCount"]
+            # item['reply'] = json.loads(jsonstr["beReplied"])
+            item['likeNum'] = l["likeNum"]
             yield item

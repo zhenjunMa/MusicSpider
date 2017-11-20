@@ -7,43 +7,32 @@
 
 import codecs
 import json
-
-from scrapy.exceptions import DropItem
-
-from spider.comment_items import CommentItem
+import global_list
 
 
 class SpiderPipeline(object):
 
     def __init__(self):
-        self.likeNum = 0
-        self.comment = CommentItem()
+        self.top10 = []
+        # self.comment = CommentItem()
         self.file = codecs.open('a.json', 'wb', encoding='utf-8')
 
     def process_item(self, item, spider):
-        if item['likeNum'] > self.likeNum:
-            self.likeNum = item['likeNum']
-            self.comment['id'] = item['id']
-            self.comment['name'] = item['name']
-            self.comment['content'] = item['content']
-            self.comment['likeNum'] = item['likeNum']
+        if len(self.top10) < 10:
+            self.top10.append(item)
+        else:
+            self.top10.sort(key=lambda c: c['likeNum'])
+            min_item = self.top10[0]
+            if min_item['likeNum'] < item['likeNum']:
+                self.top10.remove(min_item)
+                self.top10.append(item)
 
     def close_spider(self, spider):
-        line = json.dumps(dict(self.comment)) + "\n"
-        self.file.write(line.decode("unicode_escape"))
+        self.top10.sort(key=lambda c: c['likeNum'], reverse=True)
+        self.file.write("song nums:" + str(global_list.song_list_num) + "\n")
+        self.file.write("song list nums:" + str(global_list.song_num) + "\n")
+        for a in self.top10:
+            line = json.dumps(dict(a)) + "\n"
+            self.file.write(line.decode("unicode_escape"))
+        self.file.close()
 
-
-# class SpiderPipeline(object):
-#
-#     def __init__(self):
-#         self.likeNum = 0
-#         self.file = codecs.open('a.json', 'wb', encoding='utf-8')
-#
-#     def process_item(self, item, spider):
-#         if item['likeNum'] > self.likeNum:
-#             print str(item['likeNum']) + '--------------' + str(self.likeNum)
-#             self.likeNum = item['likeNum']
-#             # line = json.dumps(dict(item)) + "\n"
-#             # self.file.write(line.decode("unicode_escape"))
-#             # else:
-#             #     raise DropItem('drop')
