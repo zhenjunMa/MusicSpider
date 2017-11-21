@@ -67,3 +67,4 @@ class CommentSpider(scrapy.Spider):
         # Cookie = response.headers.getlist('Set-Cookie')
         # print 'Cookie', Cookie
         print json.loads(response.body_as_unicode())
+        print response.request

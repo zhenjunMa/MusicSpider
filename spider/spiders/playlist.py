@@ -57,24 +57,24 @@ class PlayListSpider(scrapy.Spider):
     category = ["华语", "欧美", "日语", "韩语", "粤语", "小语种"]
 
     start_urls = [
-        "https://music.163.com/discover/playlist"
-        # "https://music.163.com/playlist?id=864160650"
+        # "https://music.163.com/discover/playlist"
+        "https://music.163.com/playlist?id=911642235"
     ]
 
     def parse(self, response):
-        # for l in response.xpath('//ul[@class="f-hide"]/li/a'):
-        #     song_name = l.xpath("text()")[0].extract().encode('utf-8')
-        #     song_id = l.xpath('@href')[0].extract().split("=")[1].encode('utf-8')
-        #     yield scrapy.FormRequest(
-        #         comment_link + song_id + "?csrf_token=",
-        #         formdata={"params": "xk/7lCFhrKKRmp33SBs87Yx6/9YwEHKRYlwsW5TVVn2jJ+832PNKWa798LraAwXO7hd/RD+eVZgLFnKHntbTqY52J5RTteZnYKwD1lCJnpX9x8RPeoESWo0PJ0/RPD+HxI5u3baQD4DLMOQU5DJ+0uiRcsckvxkFW8U4MAjkFWI2yN0SvrJetTERoaqU20up", "encSecKey": "8f43f3aaaa9a6e1060f04486b7c42619ab9543aca4000b885469afe992d4c86423c6bfe3494d71dcfab426891a0177347a089dd5b19561fd93ac7b79f7b617ec2b13ac677d709c2a22fb68521a181c737711e1d4cb294cb466faa40c9ca687d43d71e4e2eeaad5a217bcb01e121ae6229d5d05f129d8f91a51997fa8712df5a0"},
-        #         callback=lambda arg1=response, arg2=song_id, arg3=song_name: parse_song_page(arg1, arg2, arg3)
-        #     )
-        max_page_num = int(response.xpath('//a[@class="zpgi"]')[len(response.xpath('//a[@class="zpgi"]')) - 1].xpath('text()')[0].extract())
-        for i in range(0, max_page_num):
-            offset = i * limit
-            music_list_link = "https://music.163.com/discover/playlist?limit=" + str(limit) + "&offset=" + str(offset)
-            yield scrapy.Request(music_list_link, callback=parse_list_page)
+        for l in response.xpath('//ul[@class="f-hide"]/li/a'):
+            song_name = l.xpath("text()")[0].extract().encode('utf-8')
+            song_id = l.xpath('@href')[0].extract().split("=")[1].encode('utf-8')
+            yield scrapy.FormRequest(
+                comment_link + song_id + "?csrf_token=",
+                formdata={"params": "xk/7lCFhrKKRmp33SBs87Yx6/9YwEHKRYlwsW5TVVn2jJ+832PNKWa798LraAwXO7hd/RD+eVZgLFnKHntbTqY52J5RTteZnYKwD1lCJnpX9x8RPeoESWo0PJ0/RPD+HxI5u3baQD4DLMOQU5DJ+0uiRcsckvxkFW8U4MAjkFWI2yN0SvrJetTERoaqU20up", "encSecKey": "8f43f3aaaa9a6e1060f04486b7c42619ab9543aca4000b885469afe992d4c86423c6bfe3494d71dcfab426891a0177347a089dd5b19561fd93ac7b79f7b617ec2b13ac677d709c2a22fb68521a181c737711e1d4cb294cb466faa40c9ca687d43d71e4e2eeaad5a217bcb01e121ae6229d5d05f129d8f91a51997fa8712df5a0"},
+                callback=lambda arg1=response, arg2=song_id, arg3=song_name: parse_song_page(arg1, arg2, arg3)
+            )
+        # max_page_num = int(response.xpath('//a[@class="zpgi"]')[len(response.xpath('//a[@class="zpgi"]')) - 1].xpath('text()')[0].extract())
+        # for i in range(0, max_page_num):
+        #     offset = i * limit
+        #     music_list_link = "https://music.163.com/discover/playlist?limit=" + str(limit) + "&offset=" + str(offset)
+        #     yield scrapy.Request(music_list_link, callback=parse_list_page)
 
 
 
