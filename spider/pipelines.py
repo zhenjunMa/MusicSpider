@@ -18,7 +18,7 @@ class SpiderPipeline(object):
         self.file = codecs.open('a.json', 'wb', encoding='utf-8')
 
     def process_item(self, item, spider):
-        if len(self.top10) < 10:
+        if len(self.top10) < 100:
             self.top10.append(item)
         else:
             self.top10.sort(key=lambda c: c['likeNum'])
@@ -29,8 +29,8 @@ class SpiderPipeline(object):
 
     def close_spider(self, spider):
         self.top10.sort(key=lambda c: c['likeNum'], reverse=True)
-        self.file.write("song_list_nums:".encode('utf-8') + str(global_list.song_list_num) + "\n")
-        self.file.write("song_nums:".encode('utf-8') + str(global_list.song_num) + "\n")
+        self.file.write("song_list_nums:" + str(global_list.song_list_num) + "\n")
+        self.file.write("song_nums:" + str(global_list.song_num) + "\n")
         for a in self.top10:
             line = json.dumps(dict(a)) + "\n"
             self.file.write(line.decode("unicode_escape"))

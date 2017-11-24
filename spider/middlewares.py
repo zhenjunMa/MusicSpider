@@ -6,7 +6,11 @@
 # http://doc.scrapy.org/en/latest/topics/spider-middleware.html
 import random
 
-from scrapy import signals
+import requests
+import urllib2
+
+from bs4 import BeautifulSoup
+from scrapy import logging
 
 
 class RotateUserAgentMiddleware(object):
@@ -40,57 +44,73 @@ class RotateUserAgentMiddleware(object):
     ]
 
 
+http_proxies = []
+
+
+def get_new_proxies():
+    xici_urls = [
+        "http://www.xicidaili.com/nn/1",
+        "http://www.xicidaili.com/nn/2",
+        "http://www.xicidaili.com/nn/3"
+    ]
+    for url in xici_urls:
+        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        referer = 'http://www.zhihu.com/articles'
+        headers = {"User-Agent": user_agent, 'Referer': referer}
+        request = urllib2.Request(url, headers=headers)
+        response = urllib2.urlopen(request)
+        soup = BeautifulSoup(response.read())
+        table = soup.find("table", attrs={"id": "ip_list"})
+        trs = table.find_all("tr")
+        for i in range(1, len(trs)):
+            tr = trs[i]
+            tds = tr.find_all("td")
+            ip = tds[1].text
+            port = tds[2].text
+            desc = tds[4].text
+            if desc.encode('utf-8') == "高匿":
+                proxy = "http://" + ip + ":" + port
+                # noinspection PyBroadException
+                try:
+                    response = requests.get("http://www.baidu.com/js/bdsug.js?v=1.0.3.0", timeout=2, allow_redirects=False, proxies={"http": proxy})
+                    if response.status_code == 200 and response.content.index("function") > -1:
+                        http_proxies.append(proxy)
+                except Exception, e:
+                    print e
+
+
 class ProxyMiddleware(object):
 
     def process_request(self, request, spider):
-        # proxy = random.choice(PROXIES)
-        # request.meta['proxy'] = "http://%s" % proxy['ip_port']
-        request.meta['proxy'] = "http://101.68.73.54:53281"
+        if "music.163.com" in request.url:
+            # 需要更换代理
+            if "change_proxy" in request.meta.keys():
+                del request.meta['change_proxy']
+                # 删除无用代理
+                invalid_proxy = request.meta['proxy']
+                if invalid_proxy in http_proxies:
+                    http_proxies.remove(invalid_proxy)
+
+            # 没有可用代理，需要重新从西刺代理获取
+            while len(http_proxies) == 0:
+                get_new_proxies()
+
+            proxy = random.choice(http_proxies)
+            request.meta['proxy'] = proxy
+
+    def process_response(self, request, response, spider):
+        if "music.163.com" in request.url:
+            # 请求被封则换代理重试
+            if response.status != 200 or "cheating" in response.body:
+                request.meta['change_proxy'] = True
+                request.dont_filter = True
+                return request
+        return response
+
+    # def process_exception(self, request, exception, spider):
+    #     if "music.163.com" in request.url:
+    #         # 异常重新处理
+    #         request.dont_filter = True
+    #         return request
 
 
-class SpiderSpiderMiddleware(object):
-    # Not all methods need to be defined. If a method is not defined,
-    # scrapy acts as if the spider middleware does not modify the
-    # passed objects.
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        # This method is used by Scrapy to create your spiders.
-        s = cls()
-        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
-        return s
-
-    def process_spider_input(self, response, spider):
-        # Called for each response that goes through the spider
-        # middleware and into the spider.
-
-        # Should return None or raise an exception.
-        return None
-
-    def process_spider_output(self, response, result, spider):
-        # Called with the results returned from the Spider, after
-        # it has processed the response.
-
-        # Must return an iterable of Request, dict or Item objects.
-        for i in result:
-            yield i
-
-    def process_spider_exception(self, response, exception, spider):
-        # Called when a spider or process_spider_input() method
-        # (from other spider middleware) raises an exception.
-
-        # Should return either None or an iterable of Response, dict
-        # or Item objects.
-        pass
-
-    def process_start_requests(self, start_requests, spider):
-        # Called with the start requests of the spider, and works
-        # similarly to the process_spider_output() method, except
-        # that it doesn’t have a response associated.
-
-        # Must return only requests (not items).
-        for r in start_requests:
-            yield r
-
-    def spider_opened(self, spider):
-        spider.logger.info('Spider opened: %s' % spider.name)

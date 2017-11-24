@@ -2,7 +2,7 @@
 
 import scrapy
 
-from spider.spiders.playlist import parse_song_page
+from spider.spiders.music_spider import parse_song_page
 
 
 # 根据指定song_id获取歌曲详情页中热门评论的第一条，即点赞数最多的一条。

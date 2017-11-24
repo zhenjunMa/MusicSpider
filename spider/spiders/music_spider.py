@@ -18,13 +18,14 @@ def parse_song_page(response, song_id, song_name):
     global_list.song_num += + 1
     jsonstr = json.loads(response.body_as_unicode())
     if len(jsonstr["hotComments"]) > 0:
-        item = CommentItem()
-        item['song_id'] = song_id
-        item['song_name'] = song_name
-        item['content'] = jsonstr["hotComments"][0]["content"]
-        # item['reply'] = json.loads(jsonstr["beReplied"])
-        item['likeNum'] = jsonstr["hotComments"][0]["likedCount"]
-        yield item
+        for comm in jsonstr["hotComments"]:
+            item = CommentItem()
+            item['song_id'] = song_id
+            item['song_name'] = song_name
+            item['content'] = comm["content"]
+            # item['reply'] = json.loads(jsonstr["beReplied"])
+            item['likeNum'] = comm["likedCount"]
+            yield item
 
 
 # 解析歌单列表页
