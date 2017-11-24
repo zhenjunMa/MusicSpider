@@ -10,7 +10,6 @@ import requests
 import urllib2
 
 from bs4 import BeautifulSoup
-from scrapy import logging
 
 
 class RotateUserAgentMiddleware(object):

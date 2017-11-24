@@ -17,6 +17,8 @@ NEWSPIDER_MODULE = 'spider.spiders'
 # LOG_LEVEL = 'INFO'
 # LOG_FILE = 'log.txt'
 
+SCHEDULER_DEBUG=True
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'spider (+http://www.yourdomain.com)'
 

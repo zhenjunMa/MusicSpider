@@ -14,8 +14,10 @@ limit = 35
 
 
 # 解析歌曲页
-def parse_song_page(response, song_id, song_name):
+def parse_song_page(response):
     global_list.song_num += + 1
+    song_name = response.meta['song_name']
+    song_id = response.meta['song_id']
     jsonstr = json.loads(response.body_as_unicode())
     if len(jsonstr["hotComments"]) > 0:
         for comm in jsonstr["hotComments"]:
@@ -38,7 +40,8 @@ def parse_song_list_page(response):
         yield scrapy.FormRequest(
             comment_link + song_id + "?csrf_token=",
             formdata={"params": "xk/7lCFhrKKRmp33SBs87Yx6/9YwEHKRYlwsW5TVVn2jJ+832PNKWa798LraAwXO7hd/RD+eVZgLFnKHntbTqY52J5RTteZnYKwD1lCJnpX9x8RPeoESWo0PJ0/RPD+HxI5u3baQD4DLMOQU5DJ+0uiRcsckvxkFW8U4MAjkFWI2yN0SvrJetTERoaqU20up", "encSecKey": "8f43f3aaaa9a6e1060f04486b7c42619ab9543aca4000b885469afe992d4c86423c6bfe3494d71dcfab426891a0177347a089dd5b19561fd93ac7b79f7b617ec2b13ac677d709c2a22fb68521a181c737711e1d4cb294cb466faa40c9ca687d43d71e4e2eeaad5a217bcb01e121ae6229d5d05f129d8f91a51997fa8712df5a0"},
-            callback=lambda arg1=response, arg2=song_id, arg3=song_name: parse_song_page(arg1, arg2, arg3)
+            callback=parse_song_page,
+            meta={"song_name": song_name, "song_id": song_id}
         )
 
 
