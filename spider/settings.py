@@ -17,7 +17,7 @@ NEWSPIDER_MODULE = 'spider.spiders'
 # LOG_LEVEL = 'INFO'
 # LOG_FILE = 'log.txt'
 
-SCHEDULER_DEBUG=True
+# SCHEDULER_DEBUG=True
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'spider (+http://www.yourdomain.com)'
@@ -61,7 +61,7 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': None,
     'spider.middlewares.RotateUserAgentMiddleware': 1,
-    # 'spider.middlewares.ProxyMiddleware': 300
+    'spider.middlewares.ProxyMiddleware': 300
 }
 
 # Enable or disable extensions

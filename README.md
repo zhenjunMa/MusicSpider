@@ -1,2 +1,8 @@
 # MusicSpider
 网易云音乐点赞最多评论爬虫
+
+song_page_spider.py:爬取指定歌曲页点赞最多的100条评论
+
+song_list_page_spider.py:爬取指定歌单页所有歌曲中点赞最多的100条评论
+
+music_spider.py:爬取网易云音乐全部歌曲中点赞最多的100条评论
