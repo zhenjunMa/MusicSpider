@@ -8,6 +8,10 @@
 import codecs
 import json
 import global_list
+import logging
+import sys
+reload(sys)
+sys.setdefaultencoding("utf8")
 
 
 class SpiderPipeline(object):
@@ -28,6 +32,7 @@ class SpiderPipeline(object):
                 self.top10.append(item)
 
     def close_spider(self, spider):
+        logging.info("爬虫结束，共计爬取歌单数：" + str(global_list.song_list_num) + "，爬取歌曲数：" + str(global_list.song_num))
         self.top10.sort(key=lambda c: c['likeNum'], reverse=True)
         self.file.write("song_list_nums:" + str(global_list.song_list_num) + "\n")
         self.file.write("song_nums:" + str(global_list.song_num) + "\n")

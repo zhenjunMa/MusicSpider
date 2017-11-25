@@ -57,13 +57,15 @@ def get_new_proxies():
         "http://www.xicidaili.com/nn/3",
         "http://www.xicidaili.com/nn/4",
     ]
+
+    # a = False
     for url in xici_urls:
         user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
         referer = 'http://www.zhihu.com/articles'
         headers = {"User-Agent": user_agent, 'Referer': referer}
         request = urllib2.Request(url, headers=headers)
         response = urllib2.urlopen(request)
-        soup = BeautifulSoup(response.read())
+        soup = BeautifulSoup(response.read(), "lxml")
         table = soup.find("table", attrs={"id": "ip_list"})
         trs = table.find_all("tr")
         for i in range(1, len(trs)):
@@ -79,8 +81,14 @@ def get_new_proxies():
                     response = requests.get("http://www.baidu.com/js/bdsug.js?v=1.0.3.0", timeout=1, allow_redirects=False, proxies={"http": proxy})
                     if response.status_code == 200 and response.content.index("function") > -1:
                         http_proxies.append(proxy)
+                        # logging.info("找到有效代理：" + proxy + "直接break")
+                        # a = True
+                        # break
                 except Exception, e:
                     logging.info("验证代理IP异常：" + str(e))
+
+        # if a:
+        #     break
 
 
 class ProxyMiddleware(object):
@@ -89,6 +97,7 @@ class ProxyMiddleware(object):
         if "music.163.com" in request.url:
             # 需要更换代理
             if "change_proxy" in request.meta.keys():
+                logging.info("检测到需要更换代理IP的请求，change_proxy=" + request.meta['proxy'] + "，proxy=" + request.meta['proxy'])
                 del request.meta['change_proxy']
                 # 删除无用代理
                 invalid_proxy = request.meta['proxy']
@@ -123,7 +132,8 @@ class ProxyMiddleware(object):
     def process_exception(self, request, exception, spider):
         if "music.163.com" in request.url:
             logging.error("爬取网易云音乐异常，url=" + str(request.url) + "，异常：" + str(exception))
-            # 异常重新处理
+            # 从日志看异常也是IP被封，因此换IP重新处理
+            request.meta['change_proxy'] = True
             request.dont_filter = True
             return request
 

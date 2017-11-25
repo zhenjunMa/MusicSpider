@@ -35,7 +35,7 @@ class ProxySpider(scrapy.Spider):
             headers = {"User-Agent": user_agent, 'Referer': referer}
             request = urllib2.Request(url, headers=headers)
             response = urllib2.urlopen(request)
-            soup = BeautifulSoup(response.read())
+            soup = BeautifulSoup(response.read(), "lxml")
             table = soup.find("table", attrs={"id": "ip_list"})
             trs = table.find_all("tr")
             for i in range(1, len(trs)):
