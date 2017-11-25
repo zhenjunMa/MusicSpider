@@ -3,9 +3,13 @@
 import json
 
 import scrapy
+import logging
 
 from spider import global_list
 from spider.comment_items import CommentItem
+import sys
+reload(sys)
+sys.setdefaultencoding("utf8")
 
 domain_link = 'https://music.163.com'
 comment_link = 'https://music.163.com/weapi/v1/resource/comments/R_SO_4_'
@@ -19,15 +23,18 @@ def parse_song_page(response):
     song_name = response.meta['song_name']
     song_id = response.meta['song_id']
     jsonstr = json.loads(response.body_as_unicode())
-    if len(jsonstr["hotComments"]) > 0:
-        for comm in jsonstr["hotComments"]:
-            item = CommentItem()
-            item['song_id'] = song_id
-            item['song_name'] = song_name
-            item['content'] = comm["content"]
-            # item['reply'] = json.loads(jsonstr["beReplied"])
-            item['likeNum'] = comm["likedCount"]
-            yield item
+    try:
+        if len(jsonstr["hotComments"]) > 0:
+            for comm in jsonstr["hotComments"]:
+                item = CommentItem()
+                item['song_id'] = song_id
+                item['song_name'] = song_name
+                item['content'] = comm["content"]
+                # item['reply'] = json.loads(jsonstr["beReplied"])
+                item['likeNum'] = comm["likedCount"]
+                yield item
+    except Exception, e:
+        logging.info("解析热门评论异常，输出返回结果：" + response.body + "，异常：" + str(e))
 
 
 # 解析歌单列表页
@@ -48,9 +55,10 @@ def parse_song_list_page(response):
 # 解析歌单页
 def parse_list_page(response):
     for music_list in response.xpath('//a[@class="tit f-thide s-fc0"]'):
-        # music_list_name = music_list.xpath('text()')[0].extract()
+        music_list_name = music_list.xpath('text()')[0].extract()
         music_list_suffix = music_list.xpath('@href')[0].extract()
         # print music_list_name.encode("utf-8")
+        logging.info("解析歌单：music_list_suffix=" + music_list_suffix + ",music_list_name=" + music_list_name.encode("utf-8"))
         yield scrapy.Request(domain_link + music_list_suffix, callback=parse_song_list_page)
 
 
@@ -73,6 +81,7 @@ class MusicSpider(scrapy.Spider):
         for i in range(0, max_page_num):
             offset = i * limit
             music_list_link = "https://music.163.com/discover/playlist?order=hot&cat=" + cat + "&limit=" + str(limit) + "&offset=" + str(offset)
+            logging.info("获取歌单列表页：" + music_list_link)
             yield scrapy.Request(music_list_link, callback=parse_list_page)
 
 

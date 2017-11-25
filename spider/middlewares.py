@@ -4,12 +4,16 @@
 #
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/spider-middleware.html
+import json
 import random
 
 import requests
 import urllib2
-
+import logging
 from bs4 import BeautifulSoup
+import sys
+reload(sys)
+sys.setdefaultencoding("utf8")
 
 
 class RotateUserAgentMiddleware(object):
@@ -50,7 +54,8 @@ def get_new_proxies():
     xici_urls = [
         "http://www.xicidaili.com/nn/1",
         "http://www.xicidaili.com/nn/2",
-        "http://www.xicidaili.com/nn/3"
+        "http://www.xicidaili.com/nn/3",
+        "http://www.xicidaili.com/nn/4",
     ]
     for url in xici_urls:
         user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
@@ -71,11 +76,11 @@ def get_new_proxies():
                 proxy = "http://" + ip + ":" + port
                 # noinspection PyBroadException
                 try:
-                    response = requests.get("http://www.baidu.com/js/bdsug.js?v=1.0.3.0", timeout=2, allow_redirects=False, proxies={"http": proxy})
+                    response = requests.get("http://www.baidu.com/js/bdsug.js?v=1.0.3.0", timeout=1, allow_redirects=False, proxies={"http": proxy})
                     if response.status_code == 200 and response.content.index("function") > -1:
                         http_proxies.append(proxy)
                 except Exception, e:
-                    print e
+                    logging.info("验证代理IP异常：" + str(e))
 
 
 class ProxyMiddleware(object):
@@ -92,24 +97,34 @@ class ProxyMiddleware(object):
 
             # 没有可用代理，需要重新从西刺代理获取
             while len(http_proxies) == 0:
+                logging.info("没有可用代理，开始重新获取...")
                 get_new_proxies()
+                logging.info("本次获取到有效代理IP：" + str(http_proxies))
 
             proxy = random.choice(http_proxies)
             request.meta['proxy'] = proxy
 
     def process_response(self, request, response, spider):
         if "music.163.com" in request.url:
-            # 请求被封则换代理重试
-            if response.status != 200 or "cheating" in response.body:
-                request.meta['change_proxy'] = True
-                request.dont_filter = True
-                return request
+            try:
+                jsonstr = json.loads(response.body_as_unicode())
+                if "msg" in jsonstr.keys():
+                    if jsonstr['msg'] == 'Cheating':
+                        # 请求被封则换代理重试
+                        logging.info("IP被封，开始重新获取..." + request.meta['proxy'])
+                        request.meta['change_proxy'] = True
+                        request.dont_filter = True
+                        return request
+            except Exception:
+                pass
+
         return response
 
-    # def process_exception(self, request, exception, spider):
-    #     if "music.163.com" in request.url:
-    #         # 异常重新处理
-    #         request.dont_filter = True
-    #         return request
+    def process_exception(self, request, exception, spider):
+        if "music.163.com" in request.url:
+            logging.error("爬取网易云音乐异常，url=" + str(request.url) + "，异常：" + str(exception))
+            # 异常重新处理
+            request.dont_filter = True
+            return request
 
 

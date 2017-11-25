@@ -14,8 +14,8 @@ BOT_NAME = 'spider'
 SPIDER_MODULES = ['spider.spiders']
 NEWSPIDER_MODULE = 'spider.spiders'
 
-# LOG_LEVEL = 'INFO'
-# LOG_FILE = 'log.txt'
+LOG_LEVEL = 'INFO'
+LOG_FILE = 'log.txt'
 
 # SCHEDULER_DEBUG=True
 
