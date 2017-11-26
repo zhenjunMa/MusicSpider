@@ -1,4 +1,4 @@
 .idea
 a.json
 *.pyc
-log.txt
+log*
